@@ -9,11 +9,14 @@ export function originFromUrlPattern(pattern: string): string | null {
   }
 }
 
+const CACHE_BUST = Date.now().toString(36);
+
 export function faviconUrl(origin: string, size = 32): string {
   const getURL = browser.runtime.getURL as (path: string) => string;
   const url = new URL(getURL('/_favicon/'));
   url.searchParams.set('pageUrl', origin);
   url.searchParams.set('size', String(size));
+  url.searchParams.set('_', CACHE_BUST);
   return url.toString();
 }
 
