@@ -1,0 +1,36 @@
+{
+  "name": "better-manhwa-reader",
+  "description": "Clamp manhwa reader pages to mobile width on desktop.",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "vue-tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "@vueuse/core": "^14.3.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-vue-next": "^1.0.0",
+    "reka-ui": "^2.9.7",
+    "tailwind-merge": "^3.6.0",
+    "vue": "^3.5.29"
+  },
+  "devDependencies": {
+    "@wxt-dev/module-vue": "^1.0.3",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.15",
+    "tailwindcss": "3",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.5",
+    "wxt": "^0.20.26"
+  }
+}
