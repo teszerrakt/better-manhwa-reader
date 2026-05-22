@@ -10,4 +10,13 @@ export const DEFAULT_SITES: SiteConfig[] = [
     enabled: true,
     builtin: true,
   },
+  {
+    id: 'flamecomics',
+    name: 'FlameComics',
+    urlPattern: 'https://flamecomics.xyz/series/*/*',
+    selector: 'main',
+    width: 480,
+    enabled: true,
+    builtin: true,
+  },
 ];

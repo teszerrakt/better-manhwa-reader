@@ -54,15 +54,15 @@ function submit() {
     <div class="flex-1 space-y-4 overflow-y-auto px-4 py-4">
       <div class="space-y-1.5">
         <Label class="text-xs">Name</Label>
-        <Input v-model="form.name" placeholder="Flamescans" />
+        <Input v-model="form.name" placeholder="ex. FlameComics" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">URL pattern</Label>
-        <Input v-model="form.urlPattern" placeholder="https://flamescans.org/*/chapter/*" />
+        <Input v-model="form.urlPattern" placeholder="ex. https://flamecomics.xyz/series/*/*" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">CSS selector</Label>
-        <Input v-model="form.selector" placeholder="main" />
+        <Input v-model="form.selector" placeholder="ex. main" />
       </div>
       <div class="space-y-2">
         <div class="flex items-center justify-between">
