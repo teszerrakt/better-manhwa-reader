@@ -10,4 +10,5 @@ export type SiteConfig = {
 
 export type StorageShape = {
   sites: SiteConfig[];
+  lastSelectedId?: string;
 };
