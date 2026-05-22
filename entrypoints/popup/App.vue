@@ -168,11 +168,9 @@ function selectSite(id: string) {
               <span class="truncate">{{ site.name }}</span>
             </button>
             <Switch
-              size="sm"
               :model-value="site.enabled"
               :title="site.enabled ? 'Disable' : 'Enable'"
               @update:model-value="(v: boolean) => toggleEnabled(site, v)"
-              @click.stop
             />
           </div>
         </nav>
