@@ -2,7 +2,7 @@ import { browser } from 'wxt/browser';
 
 export function originFromUrlPattern(pattern: string): string | null {
   try {
-    const concrete = pattern.replace(/\*/g, 'x');
+    const concrete = pattern.replace(/^\*:\/\//, 'https://').replace(/\*/g, 'x');
     return new URL(concrete).origin;
   } catch {
     return null;

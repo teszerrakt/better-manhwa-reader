@@ -59,7 +59,7 @@ onMounted(async () => {
 onUnmounted(() => unsubscribe?.());
 
 watch(selectedId, (id) => {
-  if (id) saveLastSelected(id);
+  if (id) saveLastSelected(id).catch((err) => console.error('saveLastSelected failed', err));
 });
 
 async function persist(next: SiteConfig[]) {
@@ -118,6 +118,7 @@ function selectSite(id: string) {
             variant="ghost"
             size="icon-xs"
             :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
             @click="toggleDark()"
           >
             <RiSunLine v-if="isDark" class="size-3.5" />
@@ -125,7 +126,12 @@ function selectSite(id: string) {
           </Button>
           <AlertDialog>
             <AlertDialogTrigger as-child>
-              <Button variant="ghost" size="icon-xs" title="Reset to defaults">
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                title="Reset to defaults"
+                aria-label="Reset to defaults"
+              >
                 <RiRefreshLine class="size-3.5" />
               </Button>
             </AlertDialogTrigger>
@@ -170,6 +176,7 @@ function selectSite(id: string) {
             <Switch
               :model-value="site.enabled"
               :title="site.enabled ? 'Disable' : 'Enable'"
+              :aria-label="site.enabled ? `Disable ${site.name}` : `Enable ${site.name}`"
               @update:model-value="(v: boolean) => toggleEnabled(site, v)"
             />
           </div>

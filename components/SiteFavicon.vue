@@ -19,6 +19,7 @@ const src = computed(() => (origin.value ? faviconUrl(origin.value, props.size ?
   <div
     v-else
     class="size-5 shrink-0 rounded-sm bg-muted"
+    role="img"
     :aria-label="name"
   />
 </template>
