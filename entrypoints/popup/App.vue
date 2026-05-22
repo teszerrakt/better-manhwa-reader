@@ -110,7 +110,7 @@ function selectSite(id: string) {
 
 <template>
   <div class="flex h-full w-full bg-background text-foreground">
-    <aside class="flex w-40 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
+    <aside class="flex w-52 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
       <header class="flex items-center justify-between border-b px-3 py-2.5">
         <h1 class="text-xs font-semibold font-heading">Reader</h1>
         <div class="flex items-center gap-0.5">
