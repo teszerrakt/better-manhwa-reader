@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 import {
   loadLastSelected,
   loadSites,
@@ -68,6 +69,10 @@ async function persist(next: SiteConfig[]) {
 
 function onUpdate(updated: SiteConfig) {
   persist(sites.value.map((s) => (s.id === updated.id ? updated : s)));
+}
+
+function toggleEnabled(site: SiteConfig, value: boolean) {
+  onUpdate({ ...site, enabled: value });
 }
 
 function onDelete(id: string) {
@@ -147,17 +152,29 @@ function selectSite(id: string) {
 
       <ScrollArea class="flex-1">
         <nav class="flex flex-col p-1.5">
-          <button
+          <div
             v-for="site in sites"
             :key="site.id"
-            type="button"
             :data-active="!adding && selectedId === site.id ? '' : undefined"
-            class="group/tab flex items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground"
-            @click="selectSite(site.id)"
+            :data-disabled="site.enabled ? undefined : ''"
+            class="group/tab flex items-center gap-2 rounded-sm px-2 py-1.5 text-xs font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground"
           >
-            <SiteFavicon :url-pattern="site.urlPattern" :name="site.name" />
-            <span class="truncate">{{ site.name }}</span>
-          </button>
+            <button
+              type="button"
+              class="flex min-w-0 flex-1 items-center gap-2 text-left data-[disabled]:opacity-50 group-data-[disabled]/tab:opacity-50"
+              @click="selectSite(site.id)"
+            >
+              <SiteFavicon :url-pattern="site.urlPattern" :name="site.name" />
+              <span class="truncate">{{ site.name }}</span>
+            </button>
+            <Switch
+              size="sm"
+              :model-value="site.enabled"
+              :title="site.enabled ? 'Disable' : 'Enable'"
+              @update:model-value="(v: boolean) => toggleEnabled(site, v)"
+              @click.stop
+            />
+          </div>
         </nav>
       </ScrollArea>
 
