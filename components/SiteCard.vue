@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import type { SiteConfig } from '@/lib/types';
 import { RiDeleteBin5Line } from '@remixicon/vue';
 import { computed } from 'vue';
@@ -48,10 +47,6 @@ const widthModel = computed({
           >built-in</span
         >
       </div>
-      <Switch
-        :model-value="site.enabled"
-        @update:model-value="(v: boolean) => patch('enabled', v)"
-      />
     </header>
 
     <div class="flex-1 space-y-4 overflow-y-auto px-4 py-4">
