@@ -1,22 +1,65 @@
 <script setup lang="ts">
 import AddSiteForm from '@/components/AddSiteForm.vue';
 import SiteCard from '@/components/SiteCard.vue';
-import { loadSites, onSitesChanged, resetDefaults, saveSites } from '@/lib/storage';
+import SiteFavicon from '@/components/SiteFavicon.vue';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  loadLastSelected,
+  loadSites,
+  onSitesChanged,
+  resetDefaults,
+  saveLastSelected,
+  saveSites,
+} from '@/lib/storage';
 import type { SiteConfig } from '@/lib/types';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { RiAddLine, RiMoonLine, RiRefreshLine, RiSunLine } from '@remixicon/vue';
+import { useDark, useToggle } from '@vueuse/core';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+
+const isDark = useDark({ storageKey: 'bmr-theme' });
+const toggleDark = useToggle(isDark);
 
 const sites = ref<SiteConfig[]>([]);
+const selectedId = ref<string>('');
+const adding = ref(false);
 
 let unsubscribe: (() => void) | null = null;
 
+const selectedSite = computed(() =>
+  sites.value.find((s) => s.id === selectedId.value) ?? null,
+);
+
 onMounted(async () => {
   sites.value = await loadSites();
+  const last = await loadLastSelected();
+  selectedId.value =
+    (last && sites.value.find((s) => s.id === last)?.id) ?? sites.value[0]?.id ?? '';
   unsubscribe = onSitesChanged((next) => {
-    if (Array.isArray(next)) sites.value = next;
+    if (!Array.isArray(next)) return;
+    sites.value = next;
+    if (!next.find((s) => s.id === selectedId.value)) {
+      selectedId.value = next[0]?.id ?? '';
+    }
   });
 });
 
 onUnmounted(() => unsubscribe?.());
+
+watch(selectedId, (id) => {
+  if (id) saveLastSelected(id);
+});
 
 async function persist(next: SiteConfig[]) {
   sites.value = next;
@@ -24,46 +67,126 @@ async function persist(next: SiteConfig[]) {
 }
 
 function onUpdate(updated: SiteConfig) {
-  if (!Array.isArray(sites.value)) return;
   persist(sites.value.map((s) => (s.id === updated.id ? updated : s)));
 }
 
 function onDelete(id: string) {
-  if (!Array.isArray(sites.value)) return;
-  persist(sites.value.filter((s) => s.id !== id));
+  const next = sites.value.filter((s) => s.id !== id);
+  if (selectedId.value === id) selectedId.value = next[0]?.id ?? '';
+  persist(next);
 }
 
 function onAdd(site: SiteConfig) {
-  if (!Array.isArray(sites.value)) return;
   persist([...sites.value, site]);
+  selectedId.value = site.id;
+  adding.value = false;
+}
+
+function startAdding() {
+  adding.value = true;
+}
+
+function cancelAdding() {
+  adding.value = false;
 }
 
 async function onReset() {
-  if (!confirm('Reset to default sites? Custom sites will be removed.')) return;
-  sites.value = await resetDefaults();
+  const next = await resetDefaults();
+  sites.value = next;
+  selectedId.value = next[0]?.id ?? '';
+  adding.value = false;
+}
+
+function selectSite(id: string) {
+  adding.value = false;
+  selectedId.value = id;
 }
 </script>
 
 <template>
-  <div class="bg-background p-3">
-    <header class="mb-3 flex items-center justify-between">
-      <h1 class="text-sm font-semibold">Better Manhwa Reader</h1>
-      <button
-        class="text-xs text-muted-foreground underline-offset-2 hover:underline"
-        @click="onReset"
-      >
-        Reset
-      </button>
-    </header>
-    <div class="space-y-3">
+  <div class="flex h-full w-full bg-background text-foreground">
+    <aside class="flex w-40 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
+      <header class="flex items-center justify-between border-b px-3 py-2.5">
+        <h1 class="text-xs font-semibold font-heading">Reader</h1>
+        <div class="flex items-center gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            @click="toggleDark()"
+          >
+            <RiSunLine v-if="isDark" class="size-3.5" />
+            <RiMoonLine v-else class="size-3.5" />
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger as-child>
+              <Button variant="ghost" size="icon-xs" title="Reset to defaults">
+                <RiRefreshLine class="size-3.5" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset to defaults?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Removes all custom sites and restores built-ins to their original settings.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  @click="onReset"
+                >
+                  Reset
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </header>
+
+      <ScrollArea class="flex-1">
+        <nav class="flex flex-col p-1.5">
+          <button
+            v-for="site in sites"
+            :key="site.id"
+            type="button"
+            :data-active="!adding && selectedId === site.id ? '' : undefined"
+            class="group/tab flex items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground"
+            @click="selectSite(site.id)"
+          >
+            <SiteFavicon :url-pattern="site.urlPattern" :name="site.name" />
+            <span class="truncate">{{ site.name }}</span>
+          </button>
+        </nav>
+      </ScrollArea>
+
+      <div class="border-t p-1.5">
+        <Button
+          variant="ghost"
+          size="sm"
+          class="w-full justify-start gap-1.5"
+          :data-active="adding ? '' : undefined"
+          @click="startAdding"
+        >
+          <RiAddLine class="size-3.5" />
+          Add site
+        </Button>
+      </div>
+    </aside>
+
+    <main class="flex flex-1 flex-col bg-background">
+      <AddSiteForm v-if="adding" @add="onAdd" @cancel="cancelAdding" />
       <SiteCard
-        v-for="site in sites"
-        :key="site.id"
-        :site="site"
+        v-else-if="selectedSite"
+        :key="selectedSite.id"
+        :site="selectedSite"
         @update="onUpdate"
         @delete="onDelete"
       />
-      <AddSiteForm @add="onAdd" />
-    </div>
+      <div v-else class="flex flex-1 items-center justify-center text-xs text-muted-foreground">
+        Pick a site or add one
+      </div>
+    </main>
   </div>
 </template>
